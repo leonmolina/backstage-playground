@@ -68,7 +68,7 @@ export class PostsProvider implements EntityProvider {
       type: 'full',
       entities: entities.map(entity => ({
         entity,
-        locationKey: `frobs-provider:${this.env}`,
+        locationKey: `posts-provider:${this.env}`,
       })),
     });
   }
