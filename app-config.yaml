@@ -64,6 +64,15 @@ techdocs:
 
 auth:
   # see https://backstage.io/docs/auth/ to learn about auth providers
+  externalAccess:
+    - type: static
+      options:
+        token: dev-token
+        subject: development
+    - type: legacy
+      options:
+        subject: legacy-catalog
+        secret: ${BACKEND_SECRET}
   providers:
     # See https://backstage.io/docs/auth/guest/provider
     guest: {}
@@ -85,7 +94,7 @@ catalog:
     entityFilename: catalog-info.yaml
     pullRequestBranchName: backstage-integration
   rules:
-    - allow: [Component, System, API, Resource, Location]
+    - allow: [Component, System, API, Resource, Location, Post]
   locations:
     # Local example data, file locations are relative to the backend process, typically `packages/backend`
     - type: file
