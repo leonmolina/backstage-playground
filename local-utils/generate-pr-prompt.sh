@@ -22,6 +22,11 @@ fi
 # Get current branch name
 CURRENT_BRANCH=$(git branch --show-current)
 
+# Handle detached HEAD (git branch --show-current returns empty)
+if [[ -z "$CURRENT_BRANCH" ]]; then
+    echo -e "${RED}Error: You are in a detached HEAD state. Please check out a branch before running this script.${NC}"
+    exit 1
+fi
 if [[ "$CURRENT_BRANCH" == "main" ]]; then
     echo -e "${RED}Error: You are currently on 'main' branch. Please switch to your feature branch.${NC}"
     exit 1
