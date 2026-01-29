@@ -7,36 +7,32 @@ import {
   LoggerService,
   SchedulerServiceTaskRunner,
 } from '@backstage/backend-plugin-api';
-import { Post } from './types';
+import { Photo } from './types';
 
 /**
- * Provides entities from JSON Placeholder posts service.
- * Based on https://backstage.io/docs/features/software-catalog/external-integrations#creating-an-entity-provider
+ * Provides entities from JSON Placeholder photos service.
  */
-export class PostsProvider implements EntityProvider {
+export class PhotosProvider implements EntityProvider {
   private readonly env: string;
   private connection?: EntityProviderConnection;
   private taskRunner: SchedulerServiceTaskRunner;
-  private postsUrl = 'https://jsonplaceholder.typicode.com/posts';
-  private logger: LoggerService
+  private photosUrl = 'https://jsonplaceholder.typicode.com/photos';
+  private logger: LoggerService;
 
-  /** [1] */
   constructor(
     env: string,
     taskRunner: SchedulerServiceTaskRunner,
-    logger: LoggerService
+    logger: LoggerService,
   ) {
     this.env = env;
     this.taskRunner = taskRunner;
     this.logger = logger;
   }
 
-  /** [2] */
   getProviderName(): string {
-    return `posts-${this.env}`;
+    return `photos-${this.env}`;
   }
 
-  /** [3] */
   async connect(connection: EntityProviderConnection): Promise<void> {
     this.connection = connection;
     await this.taskRunner.run({
@@ -47,49 +43,45 @@ export class PostsProvider implements EntityProvider {
     });
   }
 
-  /** [4] */
   async run(): Promise<void> {
     if (!this.connection) {
       throw new Error('Not initialized');
     }
 
-    const response = await fetch(
-      `https://jsonplaceholder.typicode.com/posts`,
-    );
-    const data = await response.json() as Array<Post>;
-    this.logger.info(`Fetched ${data.length} posts from JSON Placeholder`);
+    const response = await fetch(this.photosUrl);
+    const data = (await response.json()) as Array<Photo>;
+    this.logger.info(`Fetched ${data.length} photos from JSON Placeholder`);
 
-    /** [5] */
-    const entities: Entity[] = this.postsToEntities(data);
+    const entities: Entity[] = this.photosToEntities(data);
     this.logger.info(`Converted to ${entities.length} entities`);
 
-    /** [6] */
     await this.connection.applyMutation({
       type: 'full',
       entities: entities.map(entity => ({
         entity,
-        locationKey: `posts-provider:${this.env}`,
+        locationKey: `photos-provider:${this.env}`,
       })),
     });
   }
 
-  private postsToEntities(data: Array<Post>): Entity[] {
-    return data.map(post => ({
+  private photosToEntities(data: Array<Photo>): Entity[] {
+    return data.map(photo => ({
       apiVersion: 'backstage.io/v1alpha1',
-      kind: 'Post',
+      kind: 'Photo',
       metadata: {
-        name: `post-${post.id}`,
-        description: post.body,
+        name: `photo-${photo.id}`,
+        title: photo.title,
         annotations: {
-          'backstage.io/managed-by-location': `url:${this.postsUrl}/${post.id}`,
-          'backstage.io/managed-by-origin-location': `url:${this.postsUrl}/${post.id}`,
+          'backstage.io/managed-by-location': `url:${this.photosUrl}/${photo.id}`,
+          'backstage.io/managed-by-origin-location': `url:${this.photosUrl}/${photo.id}`,
         },
       },
       spec: {
-        id: post.id,
-        userId: post.userId,
-        title: post.title,
-        content: post.body,
+        id: photo.id,
+        albumId: photo.albumId,
+        title: photo.title,
+        url: photo.url,
+        thumbnailUrl: photo.thumbnailUrl,
       },
     }));
   }

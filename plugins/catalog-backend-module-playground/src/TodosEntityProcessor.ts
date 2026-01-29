@@ -6,13 +6,13 @@ import {
   processingResult,
 } from '@backstage/plugin-catalog-node';
 
-export class PostsEntityProcessor implements CatalogProcessor {
+export class TodosEntityProcessor implements CatalogProcessor {
   getProcessorName(): string {
-    return 'PostsEntityProcessor';
+    return 'TodosEntityProcessor';
   }
 
   async validateEntityKind(entity: Entity): Promise<boolean> {
-    return entity.kind === 'Post';
+    return entity.kind === 'Todo';
   }
 
   async preProcessEntity(
@@ -28,12 +28,12 @@ export class PostsEntityProcessor implements CatalogProcessor {
     _location: LocationSpec,
     emit: CatalogProcessorEmit,
   ): Promise<Entity> {
-    if (entity.kind === 'Post' && entity.spec?.userId) {
+    if (entity.kind === 'Todo' && entity.spec?.userId) {
       const userId = entity.spec.userId as number;
       emit(
         processingResult.relation({
           source: {
-            kind: 'Post',
+            kind: 'Todo',
             namespace: entity.metadata.namespace || 'default',
             name: entity.metadata.name,
           },
